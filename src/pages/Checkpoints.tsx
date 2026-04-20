@@ -1,17 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, X, AlertTriangle, ChevronDown, Camera, MessageSquare } from 'lucide-react';
+import { Check, X, AlertTriangle, ChevronDown, Camera, MessageSquare, Sparkles, User } from 'lucide-react';
 import type { Zone, Checkpoint, CheckStatus } from '../types';
 import { Card, Badge, StatusIndicator, Button } from '../components/ui';
 
 interface CheckpointsProps {
   zones: Zone[];
+  selectedCheckpointId?: string | null;
+  onClearSelection?: () => void;
 }
 
-export function Checkpoints({ zones }: CheckpointsProps) {
+export function Checkpoints({ zones, selectedCheckpointId, onClearSelection }: CheckpointsProps) {
   const [filter, setFilter] = useState<'all' | 'pending' | 'failed'>('all');
   const [expandedZone, setExpandedZone] = useState<string | null>(null);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<Checkpoint | null>(null);
+
+  // Auto-expand zone and select checkpoint when navigating from Zones page
+  useEffect(() => {
+    if (selectedCheckpointId) {
+      // Find the zone containing this checkpoint
+      for (const zone of zones) {
+        const checkpoint = zone.checkpoints.find(cp => cp.id === selectedCheckpointId);
+        if (checkpoint) {
+          setExpandedZone(zone.id);
+          setSelectedCheckpoint(checkpoint);
+          break;
+        }
+      }
+    }
+  }, [selectedCheckpointId, zones]);
+
+  // Clear selection when modal closes
+  const handleCloseModal = () => {
+    setSelectedCheckpoint(null);
+    if (onClearSelection) {
+      onClearSelection();
+    }
+  };
 
   // Flatten all checkpoints with zone info
   const allCheckpoints = zones.flatMap(zone =>
@@ -37,6 +62,38 @@ export function Checkpoints({ zones }: CheckpointsProps) {
       default: return { label: 'En attente', color: 'text-gray-500', bg: 'bg-gray-50' };
     }
   };
+
+  // Status button configuration
+  const statusButtons: { status: CheckStatus; icon: React.ReactNode; label: string; activeClasses: string; inactiveClasses: string }[] = [
+    {
+      status: 'passed',
+      icon: <Check className="w-6 h-6" />,
+      label: 'Conforme',
+      activeClasses: 'bg-emerald-100 border-2 border-emerald-500 text-emerald-600',
+      inactiveClasses: 'bg-gray-100 border-2 border-transparent text-gray-400',
+    },
+    {
+      status: 'failed',
+      icon: <X className="w-6 h-6" />,
+      label: 'Non conf.',
+      activeClasses: 'bg-rose-100 border-2 border-rose-500 text-rose-600',
+      inactiveClasses: 'bg-gray-100 border-2 border-transparent text-gray-400',
+    },
+    {
+      status: 'warning',
+      icon: <AlertTriangle className="w-6 h-6" />,
+      label: 'À vérifier',
+      activeClasses: 'bg-amber-100 border-2 border-amber-500 text-amber-600',
+      inactiveClasses: 'bg-gray-100 border-2 border-transparent text-gray-400',
+    },
+    {
+      status: 'na',
+      icon: <span className="w-6 h-6 flex items-center justify-center font-medium">N/A</span>,
+      label: 'N/A',
+      activeClasses: 'bg-gray-200 border-2 border-gray-500 text-gray-700',
+      inactiveClasses: 'bg-gray-100 border-2 border-transparent text-gray-400',
+    },
+  ];
 
   return (
     <div className="p-4 lg:p-8 max-w-5xl mx-auto">
@@ -132,13 +189,29 @@ export function Checkpoints({ zones }: CheckpointsProps) {
                     {zone.filteredCheckpoints.map((checkpoint) => (
                       <div
                         key={checkpoint.id}
-                        className="p-4 flex items-start gap-3"
+                        className="p-4 flex items-start gap-3 cursor-pointer hover:bg-gray-50 transition-colors"
                         onClick={() => setSelectedCheckpoint(checkpoint)}
                       >
                         <StatusIndicator status={checkpoint.status} size="md" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm text-gray-900">{checkpoint.description}</p>
                           <p className="text-xs text-gray-500 mt-1">{checkpoint.criteria}</p>
+                          {(checkpoint.notes?.operator || checkpoint.notes?.ai) && (
+                            <div className="flex items-center gap-2 mt-2">
+                              {checkpoint.notes?.operator && (
+                                <span className="text-xs text-gray-500 flex items-center gap-1">
+                                  <User className="w-3 h-3" />
+                                  Note
+                                </span>
+                              )}
+                              {checkpoint.notes?.ai && (
+                                <span className="text-xs text-blue-500 flex items-center gap-1">
+                                  <Sparkles className="w-3 h-3" />
+                                  IA
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <Badge variant={
                           checkpoint.status === 'passed' ? 'success' :
@@ -166,61 +239,113 @@ export function Checkpoints({ zones }: CheckpointsProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 bg-gray-900/50 z-50"
-              onClick={() => setSelectedCheckpoint(null)}
+              onClick={handleCloseModal}
             />
             <motion.div
               initial={{ opacity: 0, y: '100%' }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: '100%' }}
               transition={{ type: 'tween', duration: 0.2 }}
-              className="fixed inset-x-0 bottom-0 z-50"
+              className="fixed inset-x-0 bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center z-50"
             >
-              <div className="bg-white rounded-t-3xl shadow-xl safe-area-bottom">
+              <div className="bg-white rounded-t-3xl lg:rounded-2xl w-full lg:max-w-lg max-h-[85vh] overflow-hidden shadow-xl flex flex-col">
                 {/* Handle */}
-                <div className="flex justify-center pt-3 pb-2">
+                <div className="flex justify-center pt-3 pb-2 lg:hidden">
                   <div className="w-10 h-1 bg-gray-300 rounded-full" />
                 </div>
 
-                <div className="px-5 pb-2">
+                {/* Header */}
+                <div className="px-5 pb-2 flex-shrink-0">
                   <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Point de contrôle</p>
                   <h3 className="text-lg font-semibold text-gray-900">{selectedCheckpoint.description}</h3>
                   <p className="text-sm text-gray-500 mt-2">{selectedCheckpoint.criteria}</p>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="p-4 grid grid-cols-4 gap-3">
-                  <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-emerald-50 active:bg-emerald-100 transition-colors">
-                    <Check className="w-6 h-6 text-emerald-600" />
-                    <span className="text-xs font-medium text-emerald-700">Conforme</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-rose-50 active:bg-rose-100 transition-colors">
-                    <X className="w-6 h-6 text-rose-600" />
-                    <span className="text-xs font-medium text-rose-700">Non conf.</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-amber-50 active:bg-amber-100 transition-colors">
-                    <AlertTriangle className="w-6 h-6 text-amber-600" />
-                    <span className="text-xs font-medium text-amber-700">À vérifier</span>
-                  </button>
-                  <button className="flex flex-col items-center gap-2 p-3 rounded-xl bg-gray-50 active:bg-gray-100 transition-colors">
-                    <span className="w-6 h-6 flex items-center justify-center text-gray-500 font-medium">N/A</span>
-                    <span className="text-xs font-medium text-gray-600">N/A</span>
-                  </button>
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto px-5">
+                  {/* Status Buttons - Active one is colored, others are greyed */}
+                  <div className="py-4 grid grid-cols-4 gap-3">
+                    {statusButtons.map((btn) => {
+                      const isActive = selectedCheckpoint.status === btn.status;
+                      return (
+                        <button
+                          key={btn.status}
+                          className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+                            isActive ? btn.activeClasses : btn.inactiveClasses
+                          }`}
+                        >
+                          {btn.icon}
+                          <span className={`text-xs font-medium ${isActive ? '' : 'text-gray-400'}`}>
+                            {btn.label}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Notes Section */}
+                  <div className="space-y-4 pb-4">
+                    {/* Operator Note */}
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <User className="w-4 h-4 text-gray-500" />
+                        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Note opérateur</span>
+                      </div>
+                      {selectedCheckpoint.notes?.operator ? (
+                        <p className="text-sm text-gray-700">{selectedCheckpoint.notes.operator}</p>
+                      ) : (
+                        <p className="text-sm text-gray-400 italic">Aucune note</p>
+                      )}
+                      {selectedCheckpoint.notes?.operatorAt && (
+                        <p className="text-xs text-gray-400 mt-2">
+                          {selectedCheckpoint.notes.operatorAt.toLocaleString('fr-FR', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* AI Note */}
+                    <div className="bg-blue-50 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-blue-500" />
+                        <span className="text-xs font-semibold text-blue-700 uppercase tracking-wide">Analyse IA</span>
+                      </div>
+                      {selectedCheckpoint.notes?.ai ? (
+                        <p className="text-sm text-blue-700">{selectedCheckpoint.notes.ai}</p>
+                      ) : (
+                        <p className="text-sm text-blue-400 italic">Aucune analyse disponible</p>
+                      )}
+                      {selectedCheckpoint.notes?.aiGeneratedAt && (
+                        <p className="text-xs text-blue-400 mt-2">
+                          Généré le {selectedCheckpoint.notes.aiGeneratedAt.toLocaleString('fr-FR', {
+                            day: 'numeric',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                {/* Additional Actions */}
-                <div className="px-4 pb-4 flex gap-3">
-                  <button className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 text-gray-700">
-                    <Camera className="w-5 h-5" />
-                    <span className="text-sm font-medium">Photo</span>
-                  </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 text-gray-700">
-                    <MessageSquare className="w-5 h-5" />
-                    <span className="text-sm font-medium">Note</span>
-                  </button>
-                </div>
-
-                <div className="px-4 pb-6">
-                  <Button variant="ghost" fullWidth onClick={() => setSelectedCheckpoint(null)}>
+                {/* Footer Actions */}
+                <div className="flex-shrink-0 border-t border-gray-100 p-4 safe-area-bottom">
+                  <div className="flex gap-3 mb-3">
+                    <button className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+                      <Camera className="w-5 h-5" />
+                      <span className="text-sm font-medium">Photo</span>
+                    </button>
+                    <button className="flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+                      <MessageSquare className="w-5 h-5" />
+                      <span className="text-sm font-medium">Note</span>
+                    </button>
+                  </div>
+                  <Button variant="ghost" fullWidth onClick={handleCloseModal}>
                     Fermer
                   </Button>
                 </div>

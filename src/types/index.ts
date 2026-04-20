@@ -7,6 +7,20 @@ export type CheckStatus = 'pending' | 'passed' | 'failed' | 'warning' | 'na';
 export type IssueSeverity = 'critical' | 'major' | 'minor' | 'info';
 export type IssueStatus = 'open' | 'in_progress' | 'resolved' | 'dismissed';
 
+// Stage/Event status
+export type StageStatus = 'upcoming' | 'live' | 'completed';
+
+// Stage/Étape (like Tour de France stage)
+export interface Stage {
+  id: string;
+  number: number;
+  name: string;
+  location: string;
+  date: Date;
+  status: StageStatus;
+  audit?: Audit;
+}
+
 // Zone in village
 export interface Zone {
   id: string;
@@ -20,6 +34,14 @@ export interface Zone {
   issues: number;
 }
 
+// Notes for checkpoints
+export interface CheckpointNotes {
+  operator?: string;
+  operatorAt?: Date;
+  ai?: string;
+  aiGeneratedAt?: Date;
+}
+
 // Individual checkpoint to verify
 export interface Checkpoint {
   id: string;
@@ -28,7 +50,7 @@ export interface Checkpoint {
   description: string;
   criteria: string;
   status: CheckStatus;
-  notes?: string;
+  notes?: CheckpointNotes;
   photos?: string[];
   checkedAt?: Date;
   checkedBy?: string;
@@ -53,6 +75,7 @@ export interface Issue {
 // Audit event/stage
 export interface Audit {
   id: string;
+  stageId: string;
   name: string;
   location: string;
   date: Date;
@@ -67,7 +90,7 @@ export interface Audit {
   completedAt?: Date;
 }
 
-// Historical audit for comparison
+// Historical audit for comparison (legacy - now we use Stage)
 export interface AuditHistory {
   id: string;
   name: string;

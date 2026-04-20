@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, CheckCircle2, AlertTriangle, Clock, X } from 'lucide-react';
-import type { Zone, PageId } from '../types';
+import type { Zone } from '../types';
 import { Card, Badge, Progress, StatusIndicator, Button } from '../components/ui';
 
 interface ZonesProps {
   zones: Zone[];
-  onNavigate: (page: PageId) => void;
+  onNavigateToCheckpoint: (checkpointId: string) => void;
 }
 
-export function Zones({ zones }: ZonesProps) {
+export function Zones({ zones, onNavigateToCheckpoint }: ZonesProps) {
   const [filter, setFilter] = useState<'all' | 'pending' | 'issues'>('all');
   const [selectedZone, setSelectedZone] = useState<Zone | null>(null);
 
@@ -37,6 +37,11 @@ export function Zones({ zones }: ZonesProps) {
       general: 'Général',
     };
     return labels[type];
+  };
+
+  const handleCheckpointClick = (checkpointId: string) => {
+    setSelectedZone(null);
+    onNavigateToCheckpoint(checkpointId);
   };
 
   return (
@@ -148,9 +153,9 @@ export function Zones({ zones }: ZonesProps) {
               transition={{ type: 'tween', duration: 0.2 }}
               className="fixed inset-x-0 bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center z-50"
             >
-              <div className="bg-white rounded-t-3xl lg:rounded-2xl w-full lg:max-w-2xl max-h-[85vh] lg:max-h-[80vh] overflow-hidden shadow-xl">
+              <div className="bg-white rounded-t-3xl lg:rounded-2xl w-full lg:max-w-2xl max-h-[80vh] lg:max-h-[85vh] overflow-hidden shadow-xl flex flex-col">
                 {/* Modal Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between">
+                <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between flex-shrink-0">
                   <div>
                     <p className="text-xs text-gray-500 uppercase tracking-wide">{getZoneTypeLabel(selectedZone.type)}</p>
                     <h2 className="text-lg font-semibold text-gray-900">{selectedZone.shortName}</h2>
@@ -164,7 +169,7 @@ export function Zones({ zones }: ZonesProps) {
                 </div>
 
                 {/* Modal Content */}
-                <div className="p-5 overflow-y-auto max-h-[calc(85vh-80px)] lg:max-h-[calc(80vh-80px)]">
+                <div className="flex-1 overflow-y-auto p-5">
                   {/* Progress */}
                   <div className="mb-6">
                     <div className="flex items-center justify-between mb-2">
@@ -181,17 +186,17 @@ export function Zones({ zones }: ZonesProps) {
 
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
+                    <div className="bg-emerald-50 rounded-xl p-3 text-center">
                       <p className="text-2xl font-extralight text-emerald-500">
                         {selectedZone.checkpoints.filter(cp => cp.status === 'passed').length}
                       </p>
-                      <p className="text-xs text-gray-500">Conformes</p>
+                      <p className="text-xs text-emerald-600">Conformes</p>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
+                    <div className="bg-rose-50 rounded-xl p-3 text-center">
                       <p className="text-2xl font-extralight text-rose-500">
                         {selectedZone.checkpoints.filter(cp => cp.status === 'failed').length}
                       </p>
-                      <p className="text-xs text-gray-500">Non conformes</p>
+                      <p className="text-xs text-rose-600">Non conformes</p>
                     </div>
                     <div className="bg-gray-50 rounded-xl p-3 text-center">
                       <p className="text-2xl font-extralight text-gray-500">
@@ -205,13 +210,14 @@ export function Zones({ zones }: ZonesProps) {
                   <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">Points de contrôle</h3>
                   <div className="space-y-2">
                     {selectedZone.checkpoints.map((checkpoint) => (
-                      <div
+                      <button
                         key={checkpoint.id}
-                        className={`p-4 rounded-xl border ${
-                          checkpoint.status === 'passed' ? 'border-emerald-200 bg-emerald-50/50' :
-                          checkpoint.status === 'failed' ? 'border-rose-200 bg-rose-50/50' :
-                          checkpoint.status === 'warning' ? 'border-amber-200 bg-amber-50/50' :
-                          'border-gray-200 bg-white'
+                        onClick={() => handleCheckpointClick(checkpoint.id)}
+                        className={`w-full p-4 rounded-xl border text-left transition-colors hover:shadow-sm ${
+                          checkpoint.status === 'passed' ? 'border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50' :
+                          checkpoint.status === 'failed' ? 'border-rose-200 bg-rose-50/50 hover:bg-rose-50' :
+                          checkpoint.status === 'warning' ? 'border-amber-200 bg-amber-50/50 hover:bg-amber-50' :
+                          'border-gray-200 bg-white hover:bg-gray-50'
                         }`}
                       >
                         <div className="flex items-start gap-3">
@@ -219,15 +225,22 @@ export function Zones({ zones }: ZonesProps) {
                           <div className="flex-1">
                             <p className="text-sm font-medium text-gray-900">{checkpoint.description}</p>
                             <p className="text-xs text-gray-500 mt-1">{checkpoint.criteria}</p>
+                            {checkpoint.notes?.ai && (
+                              <p className="text-xs text-blue-600 mt-2 flex items-center gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                                Note IA disponible
+                              </p>
+                            )}
                           </div>
+                          <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                         </div>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Modal Footer */}
-                <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 safe-area-bottom">
+                <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 flex-shrink-0 safe-area-bottom">
                   <Button fullWidth onClick={() => setSelectedZone(null)}>
                     Fermer
                   </Button>

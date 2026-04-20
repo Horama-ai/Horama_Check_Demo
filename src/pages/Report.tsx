@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion';
-import { Download, Share2, CheckCircle2, AlertTriangle, Clock, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Download, Share2, CheckCircle2, AlertTriangle, Clock, FileText, X, ChevronRight } from 'lucide-react';
 import type { Audit } from '../types';
-import { Card, Badge, Progress, Button } from '../components/ui';
+import { Card, Badge, Button, StatusIndicator } from '../components/ui';
 
 interface ReportProps {
   audit: Audit;
@@ -20,7 +21,10 @@ interface ReportProps {
   };
 }
 
+type FilterType = 'passed' | 'failed' | 'warning' | 'pending' | null;
+
 export function Report({ audit, stats }: ReportProps) {
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>(null);
   const progressPercent = Math.round((stats.completedChecks / stats.totalChecks) * 100);
 
   const getGlobalStatus = () => {
@@ -32,8 +36,41 @@ export function Report({ audit, stats }: ReportProps) {
 
   const globalStatus = getGlobalStatus();
 
+  // Get all checkpoints with zone info
+  const allCheckpoints = audit.zones.flatMap(zone =>
+    zone.checkpoints.map(cp => ({ ...cp, zoneName: zone.shortName }))
+  );
+
+  // Filter checkpoints by status
+  const getFilteredCheckpoints = (filter: FilterType) => {
+    if (!filter) return [];
+    return allCheckpoints.filter(cp => cp.status === filter);
+  };
+
+  const filteredCheckpoints = getFilteredCheckpoints(selectedFilter);
+
   // Critical issues list
   const criticalIssues = audit.issues.filter(i => i.severity === 'critical' && i.status !== 'resolved');
+
+  const getFilterTitle = (filter: FilterType) => {
+    switch (filter) {
+      case 'passed': return 'Contrôles conformes';
+      case 'failed': return 'Contrôles non conformes';
+      case 'warning': return 'Contrôles à vérifier';
+      case 'pending': return 'Contrôles en attente';
+      default: return '';
+    }
+  };
+
+  const getFilterColor = (filter: FilterType) => {
+    switch (filter) {
+      case 'passed': return 'bg-emerald-50';
+      case 'failed': return 'bg-rose-50';
+      case 'warning': return 'bg-amber-50';
+      case 'pending': return 'bg-gray-50';
+      default: return 'bg-white';
+    }
+  };
 
   return (
     <div className="p-4 lg:p-8 max-w-5xl mx-auto">
@@ -163,48 +200,90 @@ export function Report({ audit, stats }: ReportProps) {
         </div>
       </div>
 
-      {/* Detailed Stats */}
+      {/* Detailed Stats - Clickable */}
       <Card className="p-5 lg:p-6 mb-6">
         <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Détail des contrôles</h3>
 
-        <div className="space-y-4">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Conformes</span>
-              <span className="text-sm font-medium text-emerald-600">{stats.passedChecks}</span>
+        <div className="space-y-3">
+          {/* Conformes */}
+          <button
+            onClick={() => setSelectedFilter('passed')}
+            className="w-full p-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 transition-colors text-left flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Conformes</p>
+                <p className="text-xs text-gray-500">{stats.passedChecks} contrôles</p>
+              </div>
             </div>
-            <Progress value={stats.passedChecks} max={stats.totalChecks} size="md" />
-          </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-light text-emerald-600">{Math.round((stats.passedChecks / stats.totalChecks) * 100)}%</span>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </div>
+          </button>
 
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">Non conformes</span>
-              <span className="text-sm font-medium text-rose-600">{stats.failedChecks}</span>
+          {/* Non conformes */}
+          <button
+            onClick={() => setSelectedFilter('failed')}
+            className="w-full p-3 rounded-xl bg-rose-50 hover:bg-rose-100 transition-colors text-left flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center">
+                <X className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">Non conformes</p>
+                <p className="text-xs text-gray-500">{stats.failedChecks} contrôles</p>
+              </div>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-rose-400 rounded-full" style={{ width: `${(stats.failedChecks / stats.totalChecks) * 100}%` }} />
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-light text-rose-600">{Math.round((stats.failedChecks / stats.totalChecks) * 100)}%</span>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
             </div>
-          </div>
+          </button>
 
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">À vérifier</span>
-              <span className="text-sm font-medium text-amber-600">{stats.warningChecks}</span>
+          {/* À vérifier */}
+          <button
+            onClick={() => setSelectedFilter('warning')}
+            className="w-full p-3 rounded-xl bg-amber-50 hover:bg-amber-100 transition-colors text-left flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">À vérifier</p>
+                <p className="text-xs text-gray-500">{stats.warningChecks} contrôles</p>
+              </div>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-amber-400 rounded-full" style={{ width: `${(stats.warningChecks / stats.totalChecks) * 100}%` }} />
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-light text-amber-600">{Math.round((stats.warningChecks / stats.totalChecks) * 100)}%</span>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
             </div>
-          </div>
+          </button>
 
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">En attente</span>
-              <span className="text-sm font-medium text-gray-500">{stats.pendingChecks}</span>
+          {/* En attente */}
+          <button
+            onClick={() => setSelectedFilter('pending')}
+            className="w-full p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors text-left flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center">
+                <Clock className="w-5 h-5 text-gray-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-900">En attente</p>
+                <p className="text-xs text-gray-500">{stats.pendingChecks} contrôles</p>
+              </div>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-              <div className="h-full bg-gray-400 rounded-full" style={{ width: `${(stats.pendingChecks / stats.totalChecks) * 100}%` }} />
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-light text-gray-500">{Math.round((stats.pendingChecks / stats.totalChecks) * 100)}%</span>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
             </div>
-          </div>
+          </button>
         </div>
       </Card>
 
@@ -234,6 +313,82 @@ export function Report({ audit, stats }: ReportProps) {
         </p>
         <p>{new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
       </div>
+
+      {/* Checkpoint List Panel */}
+      <AnimatePresence>
+        {selectedFilter && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-gray-900/50 z-50"
+              onClick={() => setSelectedFilter(null)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: '100%' }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: '100%' }}
+              transition={{ type: 'tween', duration: 0.2 }}
+              className="fixed inset-x-0 bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center z-50"
+            >
+              <div className={`bg-white rounded-t-3xl lg:rounded-2xl w-full lg:max-w-lg max-h-[70vh] lg:max-h-[80vh] overflow-hidden shadow-xl flex flex-col`}>
+                {/* Header */}
+                <div className={`p-5 ${getFilterColor(selectedFilter)} border-b border-gray-100 flex-shrink-0`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold text-gray-900">{getFilterTitle(selectedFilter)}</h2>
+                      <p className="text-sm text-gray-500 mt-0.5">{filteredCheckpoints.length} contrôles</p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedFilter(null)}
+                      className="p-2 hover:bg-white/50 rounded-full transition-colors"
+                    >
+                      <X className="w-5 h-5 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* List */}
+                <div className="flex-1 overflow-y-auto p-4">
+                  {filteredCheckpoints.length === 0 ? (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">Aucun contrôle</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredCheckpoints.map((cp) => (
+                        <div
+                          key={cp.id}
+                          className="p-3 bg-gray-50 rounded-xl"
+                        >
+                          <div className="flex items-start gap-3">
+                            <StatusIndicator status={cp.status} size="md" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900">{cp.description}</p>
+                              <p className="text-xs text-gray-500 mt-1">{(cp as any).zoneName} • {cp.criteria}</p>
+                              {cp.notes?.operator && (
+                                <p className="text-xs text-gray-600 mt-2 italic">"{cp.notes.operator}"</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="p-4 border-t border-gray-100 flex-shrink-0 safe-area-bottom">
+                  <Button variant="ghost" fullWidth onClick={() => setSelectedFilter(null)}>
+                    Fermer
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -175,7 +175,7 @@ export function Issues({ issues }: IssuesProps) {
         </div>
       )}
 
-      {/* Issue Detail Modal */}
+      {/* Issue Detail Modal - Fixed for mobile */}
       <AnimatePresence>
         {selectedIssue && (
           <>
@@ -193,9 +193,14 @@ export function Issues({ issues }: IssuesProps) {
               transition={{ type: 'tween', duration: 0.2 }}
               className="fixed inset-x-0 bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center z-50"
             >
-              <div className="bg-white rounded-t-3xl lg:rounded-2xl w-full lg:max-w-lg max-h-[85vh] overflow-hidden shadow-xl">
+              <div className="bg-white rounded-t-3xl lg:rounded-2xl w-full lg:max-w-lg max-h-[80vh] overflow-hidden shadow-xl flex flex-col">
+                {/* Handle - Mobile only */}
+                <div className="flex justify-center pt-3 pb-1 lg:hidden flex-shrink-0">
+                  <div className="w-10 h-1 bg-gray-300 rounded-full" />
+                </div>
+
                 {/* Header */}
-                <div className={`p-5 ${getSeverityConfig(selectedIssue.severity).bg}`}>
+                <div className={`p-5 ${getSeverityConfig(selectedIssue.severity).bg} flex-shrink-0`}>
                   <div className="flex items-center justify-between mb-3">
                     <Badge
                       variant={selectedIssue.severity === 'critical' ? 'danger' : selectedIssue.severity === 'major' ? 'warning' : 'default'}
@@ -216,8 +221,8 @@ export function Issues({ issues }: IssuesProps) {
                   </div>
                 </div>
 
-                {/* Content */}
-                <div className="p-5">
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto p-5">
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</h3>
                   <p className="text-sm text-gray-700 leading-relaxed">{selectedIssue.description}</p>
 
@@ -246,8 +251,8 @@ export function Issues({ issues }: IssuesProps) {
                   )}
                 </div>
 
-                {/* Actions */}
-                <div className="p-5 border-t border-gray-100 space-y-3 safe-area-bottom">
+                {/* Actions - Fixed at bottom */}
+                <div className="p-4 border-t border-gray-100 space-y-3 flex-shrink-0 safe-area-bottom">
                   {selectedIssue.status === 'open' && (
                     <Button fullWidth>Marquer en cours</Button>
                   )}
