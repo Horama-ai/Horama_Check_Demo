@@ -205,8 +205,8 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
           <div className="space-y-3">
             {priorityIssues.map((issue) => {
               const severityConfig = issue.severity === 'critical'
-                ? { bg: 'bg-rose-50', border: 'border-l-rose-400', iconBg: 'bg-rose-100', iconColor: 'text-rose-500' }
-                : { bg: 'bg-amber-50', border: 'border-l-amber-400', iconBg: 'bg-amber-100', iconColor: 'text-amber-500' };
+                ? { border: 'border-l-rose-400', iconBg: 'bg-rose-100', iconColor: 'text-rose-500' }
+                : { border: 'border-l-amber-400', iconBg: 'bg-amber-100', iconColor: 'text-amber-500' };
 
               const statusConfig = issue.status === 'open'
                 ? { label: 'Ouvert', color: 'text-rose-600' }
@@ -224,7 +224,7 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
               return (
                 <div
                   key={issue.id}
-                  className={`p-4 rounded-xl border-l-4 ${severityConfig.bg} ${severityConfig.border}`}
+                  className={`p-4 rounded-xl border-l-4 bg-white border border-gray-100 ${severityConfig.border}`}
                 >
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-xl ${severityConfig.iconBg} flex items-center justify-center flex-shrink-0`}>

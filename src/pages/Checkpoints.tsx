@@ -246,9 +246,9 @@ export function Checkpoints({ zones, selectedCheckpointId, onClearSelection }: C
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: '100%' }}
               transition={{ type: 'tween', duration: 0.2 }}
-              className="fixed inset-x-0 bottom-20 lg:bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center z-50"
+              className="fixed inset-x-0 bottom-20 lg:bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center z-50 px-3 lg:px-0"
             >
-              <div className="bg-white rounded-3xl lg:rounded-2xl w-full mx-2 lg:mx-0 lg:max-w-lg max-h-[70vh] lg:max-h-[85vh] overflow-hidden shadow-xl flex flex-col">
+              <div className="bg-white rounded-3xl lg:rounded-2xl w-full lg:max-w-lg max-h-[70vh] lg:max-h-[85vh] overflow-hidden shadow-xl flex flex-col">
                 {/* Handle */}
                 <div className="flex justify-center pt-3 pb-2 lg:hidden">
                   <div className="w-10 h-1 bg-gray-300 rounded-full" />
