@@ -184,9 +184,9 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
           <p className="text-xl lg:text-2xl font-extralight text-amber-600">{stats.warningChecks}</p>
           <p className="text-[10px] text-amber-600 uppercase">À vérifier</p>
         </div>
-        <div className="bg-gray-50 rounded-xl p-3 text-center">
-          <p className="text-xl lg:text-2xl font-extralight text-gray-500">{stats.pendingChecks}</p>
-          <p className="text-[10px] text-gray-500 uppercase">En attente</p>
+        <div className="bg-gray-100 rounded-xl p-3 text-center">
+          <p className="text-xl lg:text-2xl font-extralight text-gray-600">{stats.pendingChecks}</p>
+          <p className="text-[10px] text-gray-600 uppercase">En attente</p>
         </div>
       </div>
 
