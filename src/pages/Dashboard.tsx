@@ -131,7 +131,7 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl lg:text-3xl font-extralight text-gray-900">{progressPercent}%</span>
+                <span className={`font-extralight text-gray-900 ${progressPercent === 100 ? 'text-xl lg:text-2xl' : 'text-2xl lg:text-3xl'}`}>{progressPercent}%</span>
               </div>
             </div>
             <div>
@@ -203,26 +203,56 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
             </button>
           </div>
           <div className="space-y-3">
-            {priorityIssues.map((issue) => (
-              <div
-                key={issue.id}
-                className={`p-3 rounded-xl border-l-4 ${
-                  issue.severity === 'critical'
-                    ? 'bg-rose-50 border-l-rose-400'
-                    : 'bg-amber-50 border-l-amber-400'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{issue.title}</p>
-                    <p className="text-xs text-gray-500 mt-1">{issue.zoneName}</p>
+            {priorityIssues.map((issue) => {
+              const severityConfig = issue.severity === 'critical'
+                ? { bg: 'bg-rose-50', border: 'border-l-rose-400', iconBg: 'bg-rose-100', iconColor: 'text-rose-500' }
+                : { bg: 'bg-amber-50', border: 'border-l-amber-400', iconBg: 'bg-amber-100', iconColor: 'text-amber-500' };
+
+              const statusConfig = issue.status === 'open'
+                ? { label: 'Ouvert', color: 'text-rose-600' }
+                : { label: 'En cours', color: 'text-amber-600' };
+
+              const formatTime = (date: Date) => {
+                const now = new Date();
+                const diff = Math.floor((now.getTime() - date.getTime()) / 60000);
+                if (diff < 1) return "À l'instant";
+                if (diff < 60) return `Il y a ${diff} min`;
+                if (diff < 1440) return `Il y a ${Math.floor(diff / 60)}h`;
+                return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+              };
+
+              return (
+                <div
+                  key={issue.id}
+                  className={`p-4 rounded-xl border-l-4 ${severityConfig.bg} ${severityConfig.border}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-xl ${severityConfig.iconBg} flex items-center justify-center flex-shrink-0`}>
+                      <AlertTriangle className={`w-5 h-5 ${severityConfig.iconColor}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge variant={issue.severity === 'critical' ? 'danger' : 'warning'} size="sm">
+                          {issue.severity === 'critical' ? 'Critique' : 'Majeur'}
+                        </Badge>
+                        <span className={`text-xs ${statusConfig.color} flex items-center gap-1`}>
+                          {issue.status === 'open' ? <AlertTriangle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                          {statusConfig.label}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900">{issue.title}</p>
+                      <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                        <MapPin className="w-3 h-3" />
+                        <span>{issue.zoneName}</span>
+                        <span>•</span>
+                        <span>{formatTime(issue.createdAt)}</span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
                   </div>
-                  <Badge variant={issue.severity === 'critical' ? 'danger' : 'warning'} size="sm">
-                    {issue.severity === 'critical' ? 'Critique' : 'Majeur'}
-                  </Badge>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Card>
       )}
