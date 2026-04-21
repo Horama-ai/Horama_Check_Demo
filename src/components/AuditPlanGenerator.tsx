@@ -58,6 +58,7 @@ export function AuditPlanGenerator({ stage, onClose, onGenerate }: AuditPlanGene
   const [editingZone, setEditingZone] = useState<string | null>(null);
   const [editingCheckpoint, setEditingCheckpoint] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isAnalyzing = useRef(false);
 
   // AI analysis steps
   const initialAiSteps: AIStep[] = [
@@ -257,40 +258,37 @@ export function AuditPlanGenerator({ stage, onClose, onGenerate }: AuditPlanGene
     setDragOver(false);
   }, []);
 
-  // Simulate AI analysis with sequential steps
+  // Simulate AI analysis with sequential steps - 3 seconds each
   useEffect(() => {
-    if (step === 'analyzing' && aiSteps.length > 0) {
-      const pendingIndex = aiSteps.findIndex(s => s.status === 'pending');
+    if (step === 'analyzing' && aiSteps.length > 0 && !isAnalyzing.current) {
+      isAnalyzing.current = true;
 
-      if (pendingIndex === -1) {
-        // All steps completed, generate zones
-        setTimeout(() => {
-          setGeneratedZones(generateSyntheticZones());
-          setStep('review');
-        }, 500);
-        return;
-      }
+      const runAnalysis = async () => {
+        for (let i = 0; i < aiSteps.length; i++) {
+          // Set current step to loading
+          setAiSteps(prev => prev.map((s, idx) =>
+            idx === i ? { ...s, status: 'loading' } : s
+          ));
 
-      // Start loading current step
-      const timeout1 = setTimeout(() => {
-        setAiSteps(prev => prev.map((s, i) =>
-          i === pendingIndex ? { ...s, status: 'loading' } : s
-        ));
-      }, 200);
+          // Wait 3 seconds
+          await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // Complete current step after 3 seconds
-      const timeout2 = setTimeout(() => {
-        setAiSteps(prev => prev.map((s, i) =>
-          i === pendingIndex ? { ...s, status: 'completed' } : s
-        ));
-      }, 3000);
+          // Set current step to completed
+          setAiSteps(prev => prev.map((s, idx) =>
+            idx === i ? { ...s, status: 'completed' } : s
+          ));
+        }
 
-      return () => {
-        clearTimeout(timeout1);
-        clearTimeout(timeout2);
+        // All done - wait a moment then show results
+        await new Promise(resolve => setTimeout(resolve, 500));
+        setGeneratedZones(generateSyntheticZones());
+        setStep('review');
+        isAnalyzing.current = false;
       };
+
+      runAnalysis();
     }
-  }, [step, aiSteps]);
+  }, [step, aiSteps.length]);
 
   // Zone management functions
   const addZone = () => {

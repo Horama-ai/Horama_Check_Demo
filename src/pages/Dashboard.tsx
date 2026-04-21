@@ -127,7 +127,7 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xl font-bold text-gray-900">{progressPercent}%</span>
+                <span className="text-base font-bold text-gray-900">{progressPercent}%</span>
               </div>
             </div>
             <div>
