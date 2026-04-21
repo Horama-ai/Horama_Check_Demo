@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Share2, CheckCircle2, AlertTriangle, Clock, FileText, X, ChevronRight } from 'lucide-react';
+import { Download, Share2, CheckCircle2, AlertTriangle, Clock, FileText, X, ChevronRight, Globe } from 'lucide-react';
 import type { Audit } from '../types';
 import { Card, Badge, Button, StatusIndicator } from '../components/ui';
 
@@ -113,8 +113,14 @@ export function Report({ audit, stats }: ReportProps) {
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Auditeur</p>
-            <p className="text-sm font-medium text-gray-900 mt-1">{audit.auditor || 'Non assigné'}</p>
+            <p className="text-xs text-gray-500 uppercase tracking-wide">Opérateur</p>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
+                <span className="text-[10px] font-medium text-gray-600">OP</span>
+              </div>
+              <p className="text-sm font-medium text-gray-900">Opérateur</p>
+              <Globe className="w-3 h-3 text-gray-400" />
+            </div>
           </div>
           <div>
             <p className="text-xs text-gray-500 uppercase tracking-wide">Zones</p>

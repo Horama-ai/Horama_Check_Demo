@@ -14,7 +14,8 @@ import {
   Radio,
   Clock,
   CheckCircle2,
-  Sparkles
+  Sparkles,
+  Globe
 } from 'lucide-react';
 import { BottomNav } from './components/ui';
 import { AuditPlanGenerator } from './components/AuditPlanGenerator';
@@ -258,16 +259,17 @@ function App() {
           </div>
         </nav>
 
-        {/* User */}
+        {/* Operator */}
         <div className="p-4 border-t border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white font-medium">
-              J
+          <div className="flex items-center gap-3 px-4 py-3">
+            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-xs font-medium text-gray-600">OP</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Jean-Pierre M.</p>
-              <p className="text-xs text-gray-500">En ligne</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">Opérateur</p>
+              <p className="text-xs text-gray-500">Connecté</p>
             </div>
+            <Globe className="w-4 h-4 text-gray-400" />
           </div>
         </div>
       </aside>
