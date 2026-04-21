@@ -105,177 +105,139 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
         </div>
       </div>
 
-      {/* Main Stats - Single Row on Desktop */}
+      {/* Main Stats - IBM Style */}
       <div className="mb-6">
-        {/* Desktop: Single row with all stats */}
-        <div className="hidden lg:flex items-stretch gap-4 bg-white rounded-2xl border border-gray-100 p-1">
+        {/* Desktop: Single row */}
+        <div className="hidden lg:grid lg:grid-cols-7 gap-px bg-gray-200 rounded-xl overflow-hidden">
           {/* Progress */}
-          <div className="flex items-center gap-4 px-5 py-4 flex-1">
-            <div className="relative w-16 h-16 flex-shrink-0">
+          <div className="col-span-2 bg-white p-5 flex items-center gap-4">
+            <div className="relative w-14 h-14 flex-shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#f3f4f6" strokeWidth="6" />
                 <motion.circle
-                  cx="50" cy="50" r="40"
+                  cx="50" cy="50" r="42"
                   fill="none"
                   stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#3b82f6'}
-                  strokeWidth="8"
+                  strokeWidth="6"
                   strokeLinecap="round"
-                  strokeDasharray={`${progressPercent * 2.51} 251`}
-                  initial={{ strokeDasharray: '0 251' }}
-                  animate={{ strokeDasharray: `${progressPercent * 2.51} 251` }}
+                  strokeDasharray={`${progressPercent * 2.64} 264`}
+                  initial={{ strokeDasharray: '0 264' }}
+                  animate={{ strokeDasharray: `${progressPercent * 2.64} 264` }}
                   transition={{ duration: 1, ease: 'easeOut' }}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-lg font-semibold text-gray-900">{progressPercent}%</span>
+                <span className="text-sm font-semibold text-gray-900">{progressPercent}%</span>
               </div>
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Progression</p>
-              <p className="text-xl font-semibold text-gray-900">{stats.completedChecks}<span className="text-gray-400 font-normal">/{stats.totalChecks}</span></p>
-              <p className="text-xs text-gray-500">{stats.completedZones}/{stats.totalZones} zones</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Progression</p>
+              <p className="text-xl font-extralight text-gray-900">{stats.completedChecks}<span className="text-gray-400">/{stats.totalChecks}</span></p>
+              <p className="text-[10px] text-gray-500">{stats.completedZones}/{stats.totalZones} zones</p>
             </div>
           </div>
-
-          <div className="w-px bg-gray-100" />
 
           {/* Pass Rate */}
-          <div className="flex items-center gap-4 px-5 py-4 flex-1">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-              stats.passRate >= 90 ? 'bg-emerald-50' : stats.passRate >= 70 ? 'bg-amber-50' : 'bg-rose-50'
-            }`}>
-              <CheckCircle2 className={`w-6 h-6 ${getStatusColor(stats.passRate)}`} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Conformité</p>
-              <p className={`text-2xl font-semibold ${getStatusColor(stats.passRate)}`}>{stats.passRate}%</p>
-            </div>
+          <div className="col-span-2 bg-white p-5">
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Conformité</p>
+            <p className={`text-3xl font-extralight ${getStatusColor(stats.passRate)}`}>{stats.passRate}<span className="text-lg">%</span></p>
           </div>
-
-          <div className="w-px bg-gray-100" />
 
           {/* Open Issues */}
-          <div className="flex items-center gap-4 px-5 py-4 flex-1">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-              stats.openIssues > 0 ? 'bg-amber-50' : 'bg-emerald-50'
-            }`}>
-              <AlertTriangle className={`w-6 h-6 ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Écarts</p>
-              <p className={`text-2xl font-semibold ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
-              {stats.criticalIssues > 0 && (
-                <p className="text-xs text-rose-500 font-medium">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
-              )}
-            </div>
+          <div className="bg-white p-5">
+            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Écarts</p>
+            <p className={`text-3xl font-extralight ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
+            {stats.criticalIssues > 0 && (
+              <p className="text-[10px] text-rose-500 font-medium">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
+            )}
           </div>
 
-          <div className="w-px bg-gray-100" />
-
           {/* Quick Stats */}
-          <div className="flex items-center gap-3 px-5 py-4">
-            <div className="text-center px-3">
-              <p className="text-lg font-semibold text-emerald-600">{stats.passedChecks}</p>
-              <p className="text-[9px] text-emerald-600 uppercase font-medium">OK</p>
+          <div className="col-span-2 bg-white p-5 flex items-center justify-around">
+            <div className="text-center">
+              <p className="text-xl font-extralight text-emerald-600">{stats.passedChecks}</p>
+              <p className="text-[9px] text-emerald-600 uppercase font-semibold">OK</p>
             </div>
-            <div className="text-center px-3">
-              <p className="text-lg font-semibold text-rose-500">{stats.failedChecks}</p>
-              <p className="text-[9px] text-rose-500 uppercase font-medium">KO</p>
+            <div className="text-center">
+              <p className="text-xl font-extralight text-rose-500">{stats.failedChecks}</p>
+              <p className="text-[9px] text-rose-500 uppercase font-semibold">KO</p>
             </div>
-            <div className="text-center px-3">
-              <p className="text-lg font-semibold text-amber-500">{stats.warningChecks}</p>
-              <p className="text-[9px] text-amber-500 uppercase font-medium">Att.</p>
+            <div className="text-center">
+              <p className="text-xl font-extralight text-amber-500">{stats.warningChecks}</p>
+              <p className="text-[9px] text-amber-500 uppercase font-semibold">Att.</p>
             </div>
-            <div className="text-center px-3">
-              <p className="text-lg font-semibold text-gray-400">{stats.pendingChecks}</p>
-              <p className="text-[9px] text-gray-400 uppercase font-medium">Reste</p>
+            <div className="text-center">
+              <p className="text-xl font-extralight text-gray-400">{stats.pendingChecks}</p>
+              <p className="text-[9px] text-gray-400 uppercase font-semibold">Reste</p>
             </div>
           </div>
         </div>
 
-        {/* Mobile: Stacked cards */}
-        <div className="lg:hidden space-y-3">
-          {/* Progress Card - Full width */}
-          <Card className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="relative w-16 h-16 flex-shrink-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
-                  <motion.circle
-                    cx="50" cy="50" r="40"
-                    fill="none"
-                    stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#3b82f6'}
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray={`${progressPercent * 2.51} 251`}
-                    initial={{ strokeDasharray: '0 251' }}
-                    animate={{ strokeDasharray: `${progressPercent * 2.51} 251` }}
-                    transition={{ duration: 1, ease: 'easeOut' }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-gray-900">{progressPercent}%</span>
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Progression</p>
-                <p className="text-xl font-semibold text-gray-900">{stats.completedChecks}<span className="text-gray-400 font-normal">/{stats.totalChecks}</span></p>
-                <p className="text-xs text-gray-500">{stats.completedZones}/{stats.totalZones} zones terminées</p>
+        {/* Mobile: Stacked IBM style */}
+        <div className="lg:hidden space-y-px bg-gray-200 rounded-xl overflow-hidden">
+          {/* Progress Card */}
+          <div className="bg-white p-4 flex items-center gap-4">
+            <div className="relative w-12 h-12 flex-shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#f3f4f6" strokeWidth="6" />
+                <motion.circle
+                  cx="50" cy="50" r="42"
+                  fill="none"
+                  stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#3b82f6'}
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${progressPercent * 2.64} 264`}
+                  initial={{ strokeDasharray: '0 264' }}
+                  animate={{ strokeDasharray: `${progressPercent * 2.64} 264` }}
+                  transition={{ duration: 1, ease: 'easeOut' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs font-semibold text-gray-900">{progressPercent}%</span>
               </div>
             </div>
-          </Card>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Progression</p>
+              <p className="text-lg font-extralight text-gray-900">{stats.completedChecks}<span className="text-gray-400">/{stats.totalChecks}</span></p>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-gray-400">{stats.completedZones}/{stats.totalZones}</p>
+              <p className="text-[10px] text-gray-400">zones</p>
+            </div>
+          </div>
 
-          {/* Two cards row */}
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                  stats.passRate >= 90 ? 'bg-emerald-50' : stats.passRate >= 70 ? 'bg-amber-50' : 'bg-rose-50'
-                }`}>
-                  <CheckCircle2 className={`w-5 h-5 ${getStatusColor(stats.passRate)}`} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Conformité</p>
-                  <p className={`text-xl font-semibold ${getStatusColor(stats.passRate)}`}>{stats.passRate}%</p>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                  stats.openIssues > 0 ? 'bg-amber-50' : 'bg-emerald-50'
-                }`}>
-                  <AlertTriangle className={`w-5 h-5 ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Écarts</p>
-                  <p className={`text-xl font-semibold ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
-                </div>
-              </div>
-            </Card>
+          {/* Two stats row */}
+          <div className="grid grid-cols-2 gap-px">
+            <div className="bg-white p-4">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Conformité</p>
+              <p className={`text-2xl font-extralight ${getStatusColor(stats.passRate)}`}>{stats.passRate}<span className="text-sm">%</span></p>
+            </div>
+            <div className="bg-white p-4">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Écarts</p>
+              <p className={`text-2xl font-extralight ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
+              {stats.criticalIssues > 0 && (
+                <p className="text-[10px] text-rose-500 font-medium">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
+              )}
+            </div>
           </div>
 
           {/* Quick Stats Row */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
-            <div className="text-center flex-1">
-              <p className="text-lg font-semibold text-emerald-600">{stats.passedChecks}</p>
-              <p className="text-[9px] text-emerald-600 uppercase font-medium">Conformes</p>
+          <div className="bg-white p-3 flex items-center justify-around">
+            <div className="text-center">
+              <p className="text-lg font-extralight text-emerald-600">{stats.passedChecks}</p>
+              <p className="text-[9px] text-emerald-600 uppercase font-semibold">Conformes</p>
             </div>
-            <div className="w-px h-8 bg-gray-200" />
-            <div className="text-center flex-1">
-              <p className="text-lg font-semibold text-rose-500">{stats.failedChecks}</p>
-              <p className="text-[9px] text-rose-500 uppercase font-medium">Non conf.</p>
+            <div className="text-center">
+              <p className="text-lg font-extralight text-rose-500">{stats.failedChecks}</p>
+              <p className="text-[9px] text-rose-500 uppercase font-semibold">Non conf.</p>
             </div>
-            <div className="w-px h-8 bg-gray-200" />
-            <div className="text-center flex-1">
-              <p className="text-lg font-semibold text-amber-500">{stats.warningChecks}</p>
-              <p className="text-[9px] text-amber-500 uppercase font-medium">À vérifier</p>
+            <div className="text-center">
+              <p className="text-lg font-extralight text-amber-500">{stats.warningChecks}</p>
+              <p className="text-[9px] text-amber-500 uppercase font-semibold">À vérifier</p>
             </div>
-            <div className="w-px h-8 bg-gray-200" />
-            <div className="text-center flex-1">
-              <p className="text-lg font-semibold text-gray-400">{stats.pendingChecks}</p>
-              <p className="text-[9px] text-gray-400 uppercase font-medium">En attente</p>
+            <div className="text-center">
+              <p className="text-lg font-extralight text-gray-400">{stats.pendingChecks}</p>
+              <p className="text-[9px] text-gray-400 uppercase font-semibold">En attente</p>
             </div>
           </div>
         </div>

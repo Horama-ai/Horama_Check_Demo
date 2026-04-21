@@ -278,13 +278,12 @@ export function AuditPlanGenerator({ stage, onClose, onGenerate }: AuditPlanGene
         ));
       }, 200);
 
-      // Complete current step after delay
-      const delay = 800 + Math.random() * 600;
+      // Complete current step after 3 seconds
       const timeout2 = setTimeout(() => {
         setAiSteps(prev => prev.map((s, i) =>
           i === pendingIndex ? { ...s, status: 'completed' } : s
         ));
-      }, delay);
+      }, 3000);
 
       return () => {
         clearTimeout(timeout1);
