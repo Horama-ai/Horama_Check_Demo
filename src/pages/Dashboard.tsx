@@ -105,139 +105,146 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
         </div>
       </div>
 
-      {/* Main Stats - IBM Style */}
+      {/* Main Stats - Visual Cards */}
       <div className="mb-6">
-        {/* Desktop: Single row */}
-        <div className="hidden lg:grid lg:grid-cols-7 gap-px bg-gray-200 rounded-xl overflow-hidden">
-          {/* Progress */}
-          <div className="col-span-2 bg-white p-5 flex items-center gap-4">
-            <div className="relative w-14 h-14 flex-shrink-0">
+        {/* Desktop: Balanced grid */}
+        <div className="hidden lg:flex items-stretch gap-4">
+          {/* Progress Card */}
+          <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 flex items-center gap-5">
+            <div className="relative w-20 h-20 flex-shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#f3f4f6" strokeWidth="6" />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
                 <motion.circle
-                  cx="50" cy="50" r="42"
+                  cx="50" cy="50" r="40"
                   fill="none"
                   stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#3b82f6'}
-                  strokeWidth="6"
+                  strokeWidth="8"
                   strokeLinecap="round"
-                  strokeDasharray={`${progressPercent * 2.64} 264`}
-                  initial={{ strokeDasharray: '0 264' }}
-                  animate={{ strokeDasharray: `${progressPercent * 2.64} 264` }}
+                  strokeDasharray={`${progressPercent * 2.51} 251`}
+                  initial={{ strokeDasharray: '0 251' }}
+                  animate={{ strokeDasharray: `${progressPercent * 2.51} 251` }}
                   transition={{ duration: 1, ease: 'easeOut' }}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-semibold text-gray-900">{progressPercent}%</span>
+                <span className="text-xl font-bold text-gray-900">{progressPercent}%</span>
               </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Progression</p>
-              <p className="text-xl font-extralight text-gray-900">{stats.completedChecks}<span className="text-gray-400">/{stats.totalChecks}</span></p>
-              <p className="text-[10px] text-gray-500">{stats.completedZones}/{stats.totalZones} zones</p>
+            <div>
+              <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-2">Progression</p>
+              <p className="text-3xl font-light text-gray-900">{stats.completedChecks}<span className="text-gray-300">/{stats.totalChecks}</span></p>
+              <p className="text-sm text-gray-500 mt-1">{stats.completedZones}/{stats.totalZones} zones</p>
             </div>
           </div>
 
-          {/* Pass Rate */}
-          <div className="col-span-2 bg-white p-5">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Conformité</p>
-            <p className={`text-3xl font-extralight ${getStatusColor(stats.passRate)}`}>{stats.passRate}<span className="text-lg">%</span></p>
+          {/* Conformité Card */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 min-w-[160px]">
+            <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-2">Conformité</p>
+            <p className={`text-4xl font-light ${getStatusColor(stats.passRate)}`}>
+              {stats.passRate}<span className="text-2xl">%</span>
+            </p>
           </div>
 
-          {/* Open Issues */}
-          <div className="bg-white p-5">
-            <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Écarts</p>
-            <p className={`text-3xl font-extralight ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
+          {/* Écarts Card */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 min-w-[140px]">
+            <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-2">Écarts</p>
+            <p className={`text-4xl font-light ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
+              {stats.openIssues}
+            </p>
             {stats.criticalIssues > 0 && (
-              <p className="text-[10px] text-rose-500 font-medium">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
+              <p className="text-sm text-rose-500 font-medium mt-1">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
             )}
           </div>
 
-          {/* Quick Stats */}
-          <div className="col-span-2 bg-white p-5 flex items-center justify-around">
+          {/* Quick Stats Card */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center gap-6">
             <div className="text-center">
-              <p className="text-xl font-extralight text-emerald-600">{stats.passedChecks}</p>
-              <p className="text-[9px] text-emerald-600 uppercase font-semibold">OK</p>
+              <p className="text-2xl font-light text-emerald-500">{stats.passedChecks}</p>
+              <p className="text-[10px] text-emerald-600 uppercase font-bold tracking-wide">OK</p>
             </div>
+            <div className="w-px h-10 bg-gray-100" />
             <div className="text-center">
-              <p className="text-xl font-extralight text-rose-500">{stats.failedChecks}</p>
-              <p className="text-[9px] text-rose-500 uppercase font-semibold">KO</p>
+              <p className="text-2xl font-light text-rose-500">{stats.failedChecks}</p>
+              <p className="text-[10px] text-rose-500 uppercase font-bold tracking-wide">KO</p>
             </div>
+            <div className="w-px h-10 bg-gray-100" />
             <div className="text-center">
-              <p className="text-xl font-extralight text-amber-500">{stats.warningChecks}</p>
-              <p className="text-[9px] text-amber-500 uppercase font-semibold">Att.</p>
+              <p className="text-2xl font-light text-amber-500">{stats.warningChecks}</p>
+              <p className="text-[10px] text-amber-500 uppercase font-bold tracking-wide">ATT.</p>
             </div>
+            <div className="w-px h-10 bg-gray-100" />
             <div className="text-center">
-              <p className="text-xl font-extralight text-gray-400">{stats.pendingChecks}</p>
-              <p className="text-[9px] text-gray-400 uppercase font-semibold">Reste</p>
+              <p className="text-2xl font-light text-gray-400">{stats.pendingChecks}</p>
+              <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wide">RESTE</p>
             </div>
           </div>
         </div>
 
-        {/* Mobile: Stacked IBM style */}
-        <div className="lg:hidden space-y-px bg-gray-200 rounded-xl overflow-hidden">
+        {/* Mobile: Stacked visual cards */}
+        <div className="lg:hidden space-y-3">
           {/* Progress Card */}
-          <div className="bg-white p-4 flex items-center gap-4">
-            <div className="relative w-12 h-12 flex-shrink-0">
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4">
+            <div className="relative w-16 h-16 flex-shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#f3f4f6" strokeWidth="6" />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
                 <motion.circle
-                  cx="50" cy="50" r="42"
+                  cx="50" cy="50" r="40"
                   fill="none"
                   stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#3b82f6'}
-                  strokeWidth="6"
+                  strokeWidth="8"
                   strokeLinecap="round"
-                  strokeDasharray={`${progressPercent * 2.64} 264`}
-                  initial={{ strokeDasharray: '0 264' }}
-                  animate={{ strokeDasharray: `${progressPercent * 2.64} 264` }}
+                  strokeDasharray={`${progressPercent * 2.51} 251`}
+                  initial={{ strokeDasharray: '0 251' }}
+                  animate={{ strokeDasharray: `${progressPercent * 2.51} 251` }}
                   transition={{ duration: 1, ease: 'easeOut' }}
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-xs font-semibold text-gray-900">{progressPercent}%</span>
+                <span className="text-base font-bold text-gray-900">{progressPercent}%</span>
               </div>
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1">
               <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Progression</p>
-              <p className="text-lg font-extralight text-gray-900">{stats.completedChecks}<span className="text-gray-400">/{stats.totalChecks}</span></p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] text-gray-400">{stats.completedZones}/{stats.totalZones}</p>
-              <p className="text-[10px] text-gray-400">zones</p>
+              <p className="text-2xl font-light text-gray-900">{stats.completedChecks}<span className="text-gray-300">/{stats.totalChecks}</span></p>
+              <p className="text-xs text-gray-500">{stats.completedZones}/{stats.totalZones} zones</p>
             </div>
           </div>
 
-          {/* Two stats row */}
-          <div className="grid grid-cols-2 gap-px">
-            <div className="bg-white p-4">
+          {/* Two cards row */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white rounded-2xl border border-gray-100 p-4">
               <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Conformité</p>
-              <p className={`text-2xl font-extralight ${getStatusColor(stats.passRate)}`}>{stats.passRate}<span className="text-sm">%</span></p>
+              <p className={`text-3xl font-light ${getStatusColor(stats.passRate)}`}>{stats.passRate}<span className="text-xl">%</span></p>
             </div>
-            <div className="bg-white p-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-4">
               <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Écarts</p>
-              <p className={`text-2xl font-extralight ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
+              <p className={`text-3xl font-light ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
               {stats.criticalIssues > 0 && (
-                <p className="text-[10px] text-rose-500 font-medium">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
+                <p className="text-xs text-rose-500 font-medium">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
               )}
             </div>
           </div>
 
           {/* Quick Stats Row */}
-          <div className="bg-white p-3 flex items-center justify-around">
+          <div className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center justify-around">
             <div className="text-center">
-              <p className="text-lg font-extralight text-emerald-600">{stats.passedChecks}</p>
-              <p className="text-[9px] text-emerald-600 uppercase font-semibold">Conformes</p>
+              <p className="text-xl font-light text-emerald-500">{stats.passedChecks}</p>
+              <p className="text-[9px] text-emerald-600 uppercase font-bold">OK</p>
             </div>
+            <div className="w-px h-8 bg-gray-100" />
             <div className="text-center">
-              <p className="text-lg font-extralight text-rose-500">{stats.failedChecks}</p>
-              <p className="text-[9px] text-rose-500 uppercase font-semibold">Non conf.</p>
+              <p className="text-xl font-light text-rose-500">{stats.failedChecks}</p>
+              <p className="text-[9px] text-rose-500 uppercase font-bold">KO</p>
             </div>
+            <div className="w-px h-8 bg-gray-100" />
             <div className="text-center">
-              <p className="text-lg font-extralight text-amber-500">{stats.warningChecks}</p>
-              <p className="text-[9px] text-amber-500 uppercase font-semibold">À vérifier</p>
+              <p className="text-xl font-light text-amber-500">{stats.warningChecks}</p>
+              <p className="text-[9px] text-amber-500 uppercase font-bold">ATT.</p>
             </div>
+            <div className="w-px h-8 bg-gray-100" />
             <div className="text-center">
-              <p className="text-lg font-extralight text-gray-400">{stats.pendingChecks}</p>
-              <p className="text-[9px] text-gray-400 uppercase font-semibold">En attente</p>
+              <p className="text-xl font-light text-gray-400">{stats.pendingChecks}</p>
+              <p className="text-[9px] text-gray-400 uppercase font-bold">RESTE</p>
             </div>
           </div>
         </div>
