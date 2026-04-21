@@ -293,6 +293,107 @@ export function Report({ audit, stats }: ReportProps) {
         </div>
       </Card>
 
+      {/* Synthèse */}
+      <Card className="p-5 lg:p-6 mb-6">
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Synthèse</h3>
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600 leading-relaxed">
+            L'audit présente un taux de conformité {stats.passRate >= 90 ? 'excellent' : stats.passRate >= 70 ? 'satisfaisant' : 'insuffisant'} de{' '}
+            <span className="font-semibold">{stats.passRate}%</span>.
+            {stats.failedChecks > 0 ? (
+              <> Sur les <span className="font-semibold">{stats.totalChecks} points de contrôle</span> vérifiés,{' '}
+              <span className="font-semibold text-rose-600">{stats.failedChecks} non-conformité{stats.failedChecks > 1 ? 's' : ''}</span>{' '}
+              {stats.failedChecks > 1 ? 'ont été identifiées' : 'a été identifiée'} nécessitant une action corrective. </>
+            ) : (
+              <> L'ensemble des <span className="font-semibold">{stats.totalChecks} points de contrôle</span> vérifiés sont conformes aux exigences. </>
+            )}
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            {stats.warningChecks > 0 && (
+              <><span className="font-semibold text-amber-600">{stats.warningChecks} point{stats.warningChecks > 1 ? 's' : ''}</span>{' '}
+              nécessite{stats.warningChecks > 1 ? 'nt' : ''} une vérification complémentaire. </>
+            )}
+            {stats.openIssues > 0 ? (
+              <>Actuellement, <span className="font-semibold">{stats.openIssues} écart{stats.openIssues > 1 ? 's' : ''}</span>{' '}
+              reste{stats.openIssues > 1 ? 'nt' : ''} ouvert{stats.openIssues > 1 ? 's' : ''}{' '}
+              {stats.criticalIssues > 0 && (
+                <>dont <span className="font-semibold text-rose-600">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</span></>
+              )}.</>
+            ) : (
+              <>Aucun écart n'est actuellement ouvert.</>
+            )}
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed">
+            La couverture de l'audit s'étend sur <span className="font-semibold">{stats.totalZones} zones</span>,
+            dont <span className="font-semibold">{stats.completedZones}</span> ont été entièrement contrôlées
+            ({Math.round((stats.completedZones / stats.totalZones) * 100)}% de couverture).
+          </p>
+        </div>
+
+        {/* Summary stats tiles */}
+        <div className="rounded-xl overflow-hidden mt-5">
+          <div className="grid grid-cols-2 gap-px bg-gray-200">
+            <div className="p-3 lg:p-4 bg-gray-50">
+              <p className="text-xs lg:text-sm font-medium text-gray-900 mb-1">Zones auditées</p>
+              <p className="text-xl lg:text-2xl font-extralight text-gray-900">{stats.completedZones}/{stats.totalZones}</p>
+              <p className="text-xs text-gray-500 mt-1">{Math.round((stats.completedZones / stats.totalZones) * 100)}% complété</p>
+            </div>
+            <div className="p-3 lg:p-4 bg-gray-50">
+              <p className="text-xs lg:text-sm font-medium text-gray-900 mb-1">Contrôles effectués</p>
+              <p className="text-xl lg:text-2xl font-extralight text-gray-900">{stats.completedChecks}/{stats.totalChecks}</p>
+              <p className="text-xs text-gray-500 mt-1">{progressPercent}% complété</p>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Recommandations */}
+      <Card className="p-5 lg:p-6 mb-6 bg-gray-50">
+        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-4">Recommandations</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          {[
+            {
+              title: 'Actions correctives prioritaires',
+              description: stats.failedChecks > 0
+                ? `Traiter en priorité les ${stats.failedChecks} non-conformité${stats.failedChecks > 1 ? 's' : ''} identifiée${stats.failedChecks > 1 ? 's' : ''} pour assurer la conformité réglementaire.`
+                : 'Maintenir les bonnes pratiques actuelles et poursuivre la veille réglementaire.'
+            },
+            {
+              title: 'Vérifications complémentaires',
+              description: stats.warningChecks > 0
+                ? `Clarifier le statut des ${stats.warningChecks} point${stats.warningChecks > 1 ? 's' : ''} en attente de vérification avant le prochain audit.`
+                : 'Aucune vérification complémentaire requise à ce stade.'
+            },
+            {
+              title: 'Suivi des écarts',
+              description: stats.openIssues > 0
+                ? `Établir un plan d'action pour résoudre les ${stats.openIssues} écart${stats.openIssues > 1 ? 's' : ''} ouvert${stats.openIssues > 1 ? 's' : ''} avec des délais précis.`
+                : 'Tous les écarts ont été traités. Documenter les actions réalisées.'
+            },
+            {
+              title: 'Préparation prochain audit',
+              description: 'Planifier une revue de pré-audit 2 semaines avant la prochaine échéance pour anticiper les points sensibles.'
+            }
+          ].map((rec, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="flex items-start gap-3 p-3 lg:p-4 bg-white rounded-xl"
+            >
+              <span className="w-7 h-7 lg:w-8 lg:h-8 rounded-lg bg-gray-900 text-white text-xs lg:text-sm font-semibold flex items-center justify-center flex-shrink-0">
+                {idx + 1}
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-gray-900 mb-1">{rec.title}</p>
+                <p className="text-xs lg:text-sm text-gray-600">{rec.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </Card>
+
       {/* Critical Issues */}
       {criticalIssues.length > 0 && (
         <Card className="p-5 lg:p-6 mb-6 border-rose-200 bg-rose-50">
