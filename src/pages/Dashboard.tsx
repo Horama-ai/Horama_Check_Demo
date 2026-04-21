@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, AlertTriangle, Clock, ChevronRight, Radio, MapPin } from 'lucide-react';
 import type { Audit, PageId, Stage } from '../types';
-import { Card, Badge, Progress } from '../components/ui';
+import { Card, Badge } from '../components/ui';
 
 interface DashboardProps {
   audit: Audit;
@@ -105,23 +105,19 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
         </div>
       </div>
 
-      {/* Main Stats */}
-      <div className="grid grid-cols-2 gap-3 lg:gap-4 mb-6">
-        {/* Progress Circle */}
-        <Card className="p-4 lg:p-5 col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 lg:w-24 lg:h-24">
+      {/* Main Stats - Single Row on Desktop */}
+      <div className="mb-6">
+        {/* Desktop: Single row with all stats */}
+        <div className="hidden lg:flex items-stretch gap-4 bg-white rounded-2xl border border-gray-100 p-1">
+          {/* Progress */}
+          <div className="flex items-center gap-4 px-5 py-4 flex-1">
+            <div className="relative w-16 h-16 flex-shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                <circle
-                  cx="50" cy="50" r="40"
-                  fill="none"
-                  stroke="#e5e7eb"
-                  strokeWidth="8"
-                />
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
                 <motion.circle
                   cx="50" cy="50" r="40"
                   fill="none"
-                  stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#ef4444'}
+                  stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#3b82f6'}
                   strokeWidth="8"
                   strokeLinecap="round"
                   strokeDasharray={`${progressPercent * 2.51} 251`}
@@ -131,62 +127,157 @@ export function Dashboard({ audit, stats, onNavigate, stages, selectedStageId, o
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className={`font-extralight text-gray-900 ${progressPercent === 100 ? 'text-xl lg:text-2xl' : 'text-2xl lg:text-3xl'}`}>{progressPercent}%</span>
+                <span className="text-lg font-semibold text-gray-900">{progressPercent}%</span>
               </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Progression</p>
-              <p className="text-lg lg:text-xl font-medium text-gray-900">
-                {stats.completedChecks}/{stats.totalChecks}
-              </p>
-              <p className="text-sm text-gray-500">contrôles effectués</p>
-              <p className="text-xs text-gray-400 mt-1">{stats.completedZones}/{stats.totalZones} zones</p>
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Progression</p>
+              <p className="text-xl font-semibold text-gray-900">{stats.completedChecks}<span className="text-gray-400 font-normal">/{stats.totalChecks}</span></p>
+              <p className="text-xs text-gray-500">{stats.completedZones}/{stats.totalZones} zones</p>
             </div>
           </div>
-        </Card>
 
-        {/* Pass Rate */}
-        <Card className="p-4 lg:p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Taux conformité</p>
-          <p className={`text-3xl lg:text-4xl font-extralight ${getStatusColor(stats.passRate)}`}>
-            {stats.passRate}%
-          </p>
-          <div className="mt-2">
-            <Progress value={stats.passRate} max={100} size="sm" />
+          <div className="w-px bg-gray-100" />
+
+          {/* Pass Rate */}
+          <div className="flex items-center gap-4 px-5 py-4 flex-1">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              stats.passRate >= 90 ? 'bg-emerald-50' : stats.passRate >= 70 ? 'bg-amber-50' : 'bg-rose-50'
+            }`}>
+              <CheckCircle2 className={`w-6 h-6 ${getStatusColor(stats.passRate)}`} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Conformité</p>
+              <p className={`text-2xl font-semibold ${getStatusColor(stats.passRate)}`}>{stats.passRate}%</p>
+            </div>
           </div>
-        </Card>
 
-        {/* Open Issues */}
-        <Card className="p-4 lg:p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Écarts ouverts</p>
-          <p className={`text-3xl lg:text-4xl font-extralight ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
-            {stats.openIssues}
-          </p>
-          {stats.criticalIssues > 0 && (
-            <p className="text-xs text-rose-500 font-medium mt-1">
-              {stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}
-            </p>
-          )}
-        </Card>
-      </div>
+          <div className="w-px bg-gray-100" />
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-4 gap-2 mb-6">
-        <div className="bg-emerald-50 rounded-xl p-3 text-center">
-          <p className="text-xl lg:text-2xl font-extralight text-emerald-600">{stats.passedChecks}</p>
-          <p className="text-[10px] text-emerald-600 uppercase">Conformes</p>
+          {/* Open Issues */}
+          <div className="flex items-center gap-4 px-5 py-4 flex-1">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+              stats.openIssues > 0 ? 'bg-amber-50' : 'bg-emerald-50'
+            }`}>
+              <AlertTriangle className={`w-6 h-6 ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Écarts</p>
+              <p className={`text-2xl font-semibold ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
+              {stats.criticalIssues > 0 && (
+                <p className="text-xs text-rose-500 font-medium">{stats.criticalIssues} critique{stats.criticalIssues > 1 ? 's' : ''}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="w-px bg-gray-100" />
+
+          {/* Quick Stats */}
+          <div className="flex items-center gap-3 px-5 py-4">
+            <div className="text-center px-3">
+              <p className="text-lg font-semibold text-emerald-600">{stats.passedChecks}</p>
+              <p className="text-[9px] text-emerald-600 uppercase font-medium">OK</p>
+            </div>
+            <div className="text-center px-3">
+              <p className="text-lg font-semibold text-rose-500">{stats.failedChecks}</p>
+              <p className="text-[9px] text-rose-500 uppercase font-medium">KO</p>
+            </div>
+            <div className="text-center px-3">
+              <p className="text-lg font-semibold text-amber-500">{stats.warningChecks}</p>
+              <p className="text-[9px] text-amber-500 uppercase font-medium">Att.</p>
+            </div>
+            <div className="text-center px-3">
+              <p className="text-lg font-semibold text-gray-400">{stats.pendingChecks}</p>
+              <p className="text-[9px] text-gray-400 uppercase font-medium">Reste</p>
+            </div>
+          </div>
         </div>
-        <div className="bg-rose-50 rounded-xl p-3 text-center">
-          <p className="text-xl lg:text-2xl font-extralight text-rose-600">{stats.failedChecks}</p>
-          <p className="text-[10px] text-rose-600 uppercase">Non conf.</p>
-        </div>
-        <div className="bg-amber-50 rounded-xl p-3 text-center">
-          <p className="text-xl lg:text-2xl font-extralight text-amber-600">{stats.warningChecks}</p>
-          <p className="text-[10px] text-amber-600 uppercase">À vérifier</p>
-        </div>
-        <div className="bg-gray-100 rounded-xl p-3 text-center">
-          <p className="text-xl lg:text-2xl font-extralight text-gray-600">{stats.pendingChecks}</p>
-          <p className="text-[10px] text-gray-600 uppercase">En attente</p>
+
+        {/* Mobile: Stacked cards */}
+        <div className="lg:hidden space-y-3">
+          {/* Progress Card - Full width */}
+          <Card className="p-4">
+            <div className="flex items-center gap-4">
+              <div className="relative w-16 h-16 flex-shrink-0">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" fill="none" stroke="#f3f4f6" strokeWidth="8" />
+                  <motion.circle
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    stroke={progressPercent >= 90 ? '#10b981' : progressPercent >= 70 ? '#f59e0b' : '#3b82f6'}
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${progressPercent * 2.51} 251`}
+                    initial={{ strokeDasharray: '0 251' }}
+                    animate={{ strokeDasharray: `${progressPercent * 2.51} 251` }}
+                    transition={{ duration: 1, ease: 'easeOut' }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-semibold text-gray-900">{progressPercent}%</span>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Progression</p>
+                <p className="text-xl font-semibold text-gray-900">{stats.completedChecks}<span className="text-gray-400 font-normal">/{stats.totalChecks}</span></p>
+                <p className="text-xs text-gray-500">{stats.completedZones}/{stats.totalZones} zones terminées</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Two cards row */}
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  stats.passRate >= 90 ? 'bg-emerald-50' : stats.passRate >= 70 ? 'bg-amber-50' : 'bg-rose-50'
+                }`}>
+                  <CheckCircle2 className={`w-5 h-5 ${getStatusColor(stats.passRate)}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Conformité</p>
+                  <p className={`text-xl font-semibold ${getStatusColor(stats.passRate)}`}>{stats.passRate}%</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  stats.openIssues > 0 ? 'bg-amber-50' : 'bg-emerald-50'
+                }`}>
+                  <AlertTriangle className={`w-5 h-5 ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">Écarts</p>
+                  <p className={`text-xl font-semibold ${stats.openIssues > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>{stats.openIssues}</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Quick Stats Row */}
+          <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+            <div className="text-center flex-1">
+              <p className="text-lg font-semibold text-emerald-600">{stats.passedChecks}</p>
+              <p className="text-[9px] text-emerald-600 uppercase font-medium">Conformes</p>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div className="text-center flex-1">
+              <p className="text-lg font-semibold text-rose-500">{stats.failedChecks}</p>
+              <p className="text-[9px] text-rose-500 uppercase font-medium">Non conf.</p>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div className="text-center flex-1">
+              <p className="text-lg font-semibold text-amber-500">{stats.warningChecks}</p>
+              <p className="text-[9px] text-amber-500 uppercase font-medium">À vérifier</p>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div className="text-center flex-1">
+              <p className="text-lg font-semibold text-gray-400">{stats.pendingChecks}</p>
+              <p className="text-[9px] text-gray-400 uppercase font-medium">En attente</p>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -13,28 +13,49 @@ import {
   Calendar,
   Radio,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 import { BottomNav } from './components/ui';
+import { AuditPlanGenerator } from './components/AuditPlanGenerator';
 import { Dashboard } from './pages/Dashboard';
 import { Zones } from './pages/Zones';
 import { Checkpoints } from './pages/Checkpoints';
 import { Issues } from './pages/Issues';
 import { Report } from './pages/Report';
 import { AuditHistory } from './pages/History';
-import { stages, getAuditStats, getLiveStage } from './data/audits';
-import type { PageId, Stage } from './types';
+import { stages as initialStages, getAuditStats, getLiveStage } from './data/audits';
+import type { PageId, Stage, Audit } from './types';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<PageId>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedStageId, setSelectedStageId] = useState<string>(getLiveStage()?.id || stages[0].id);
+  const [selectedStageId, setSelectedStageId] = useState<string>(getLiveStage()?.id || initialStages[0].id);
   const [stageDropdownOpen, setStageDropdownOpen] = useState(false);
   const [selectedCheckpointId, setSelectedCheckpointId] = useState<string | null>(null);
+  const [showPlanGenerator, setShowPlanGenerator] = useState(false);
+  const [generatedAudits, setGeneratedAudits] = useState<Record<string, Audit>>({});
+
+  // Merge initial stages with generated audits
+  const stages = initialStages.map(stage => {
+    if (generatedAudits[stage.id]) {
+      return { ...stage, audit: generatedAudits[stage.id] };
+    }
+    return stage;
+  });
 
   const selectedStage = stages.find(s => s.id === selectedStageId) || stages[0];
   const audit = selectedStage.audit;
   const stats = audit ? getAuditStats(audit) : null;
+
+  // Handle audit generation
+  const handleAuditGenerated = (newAudit: Audit) => {
+    setGeneratedAudits(prev => ({
+      ...prev,
+      [selectedStage.id]: newAudit,
+    }));
+    setShowPlanGenerator(false);
+  };
 
   const navItems = [
     { id: 'dashboard' as PageId, label: 'Accueil', icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -61,7 +82,7 @@ function App() {
   const renderPage = () => {
     if (!audit || !stats) {
       return (
-        <div className="flex items-center justify-center h-[60vh]">
+        <div className="flex items-center justify-center h-[60vh] px-4">
           <div className="text-center">
             <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-lg font-medium text-gray-600">Étape à venir</p>
@@ -69,6 +90,13 @@ function App() {
             <p className="text-sm text-gray-500 mt-4">
               {selectedStage.date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
             </p>
+            <button
+              onClick={() => setShowPlanGenerator(true)}
+              className="mt-6 inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-colors shadow-lg shadow-blue-500/20"
+            >
+              <Sparkles className="w-4 h-4" />
+              Planifier le plan d'audit
+            </button>
           </div>
         </div>
       );
@@ -412,6 +440,17 @@ function App() {
         activeId={currentPage}
         onChange={(id) => setCurrentPage(id as PageId)}
       />
+
+      {/* Audit Plan Generator Modal */}
+      <AnimatePresence>
+        {showPlanGenerator && (
+          <AuditPlanGenerator
+            stage={selectedStage}
+            onClose={() => setShowPlanGenerator(false)}
+            onGenerate={handleAuditGenerated}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
